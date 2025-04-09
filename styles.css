@@ -1,71 +1,73 @@
-/* Estilo general del cuerpo de la página */
 body {
-    font-family: Arial, sans-serif; /* Establece la fuente principal */
-    background-color: #94b7f9; /* Color de fondo azul claro */
-    display: flex; /* Centra el contenido horizontal y verticalmente */
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #f0f8ff;
+    display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Ocupa toda la altura de la ventana */
-    margin: 0; /* Elimina márgenes alrededor del cuerpo */
+    height: 100vh;
+    margin: 0;
 }
 
-/* Contenedor principal del juego */
 .game-container {
-    text-align: center; /* Centra el texto dentro del contenedor */
-    background-color: hwb(186 35% 3% / 0.937); /* Fondo verde claro para el contenedor */
-    padding: 20px; /* Añade espacio interior */
-    border-radius: 10px; /* Redondea las esquinas */
-    box-shadow: 0 0 10px rgba(25, 14, 233, 0.1); /* Aplica una sombra ligera */
-    width: 300px; /* Fija el ancho del contenedor */
+    text-align: center;
+    background-color: #ffebcd;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
 }
 
-/* Estilo del título principal */
 h1 {
-    font-size: 24px; /* Tamaño de fuente del título */
-    margin-bottom: 20px; /* Espacio debajo del título */
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #ff4500;
 }
 
-/* Contenedor de la pregunta */
+.character-container {
+    margin-bottom: 20px;
+}
+
+.character-container img {
+    width: 100px;
+    height: auto;
+}
+
 .question-container {
-    margin-bottom: 20px; /* Espacio debajo de la pregunta */
+    margin-bottom: 20px;
 }
 
-/* Estilo del campo de entrada de la respuesta */
 #answer {
-    width: 100%; /* Ocupa todo el ancho disponible */
-    padding: 10px; /* Añade espacio interior */
-    margin: 10px 0; /* Espacio arriba y abajo del campo */
-    border-radius: 5px; /* Redondea las esquinas del campo */
-    border: 1px solid #1cf399; /* Borde verde claro */
-    font-size: 16px; /* Tamaño de fuente de la entrada */
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ffa07a;
+    font-size: 16px;
 }
 
-/* Estilo de los botones */
 button {
-    background-color: #215ef6; /* Color de fondo azul */
-    color: rgb(250, 246, 10); /* Color del texto blanco */
-    padding: 10px 20px; /* Espacio interior del botón */
-    border: none; /* Elimina el borde del botón */
-    border-radius: 5px; /* Redondea las esquinas del botón */
-    font-size: 16px; /* Tamaño de fuente del botón */
-    cursor: pointer; /* Cambia el cursor a mano alzada */
-    transition: background-color 0.3s; /* Transición suave en el color de fondo */
+    background-color: #32cd32;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-/* Cambio de color al pasar el cursor sobre el botón */
 button:hover {
-    background-color: #060efa; /* Color de fondo azul más oscuro */
+    background-color: #228b22;
 }
 
-/* Estilo del contenedor de resultados */
 #result {
-    font-size: 18px; /* Tamaño de fuente del resultado */
-    font-weight: bold; /* Texto en negrita */
-    margin: 20px 0; /* Espacio arriba y abajo del resultado */
+    font-size: 18px;
+    font-weight: bold;
+    margin: 20px 0;
 }
 
-/* Estilo de las estrellas que se muestran al completar una tabla */
-.star {
-    color: gold; /* Color dorado para las estrellas */
-    font-size: 24px; /* Tamaño de fuente de las estrellas */
+#rewards {
+    font-size: 16px;
+    color: #ff4500;
+    margin-top: 10px;
 }
