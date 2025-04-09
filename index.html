@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"> <!-- Codificación de caracteres UTF-8 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Configuración para que la página sea responsive -->
-    <title>Juego de Tablas de Multiplicar</title> <!-- Título de la página -->
-    <link rel="stylesheet" href="styles.css"> <!-- Enlace al archivo CSS externo -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Tablas de Multiplicar</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="game-container"> <!-- Contenedor principal del juego -->
-        <h1>Aprende las Tablas de Multiplicar</h1> <!-- Título principal del juego -->
-        <div class="question-container"> <!-- Contenedor para la pregunta y el input -->
-            <p id="question">¿Cuánto es 1 x 1?</p> <!-- Pregunta inicial -->
-            <input type="number" id="answer" placeholder="Escribe tu respuesta"> <!-- Campo de entrada para la respuesta -->
-            <button id="answerButton">Responder</button> <!-- Botón para enviar la respuesta -->
+    <div class="game-container">
+        <h1>Aprende las Tablas de Multiplicar</h1>
+        <div class="character-container">
+            <img src="character.png" alt="Personaje" id="character">
         </div>
-        <div id="result"></div> <!-- Contenedor para mostrar el resultado -->
+        <div class="question-container">
+            <p id="question">¿Cuánto es 1 x 1?</p>
+            <input type="number" id="answer" placeholder="Escribe tu respuesta">
+            <button id="answerButton">Responder</button>
+        </div>
+        <div id="result"></div>
+        <div id="rewards"></div>
     </div>
-    <script src="script.js"></script> <!-- Enlace al archivo JavaScript externo -->
+    <script src="script.js"></script>
 </body>
 </html>
