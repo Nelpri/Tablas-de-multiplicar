@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,20 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de Tablas de Multiplicar</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="background-image"></div>
     <div class="game-container">
+        <div class="score-container">
+            Puntuación: <span id="scoreDisplay">0</span>
+            <div class="streak-counter">Racha: <span id="streakDisplay">0</span>🔥</div>
+        </div>
+        
+        <select class="difficulty-selector" id="difficultySelector" title="Selecciona la dificultad">
+            <option value="EASY">Fácil</option>
+            <option value="MEDIUM">Medio</option>
+            <option value="HARD">Difícil</option>
+        </select>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
         <h1>Aprende las Tablas de Multiplicar</h1>
         <div class="character-container">
-            <img src="character.png" alt="Personaje" id="character">
+            <img src="img/img.png" alt="Personaje educativo" id="character">
         </div>
         <div class="question-container">
             <p id="question">¿Cuánto es 1 x 1?</p>
-            <input type="number" id="answer" placeholder="Escribe tu respuesta">
+            <input type="number" id="answer" placeholder="Tu respuesta" aria-label="Respuesta">
             <button id="answerButton">Responder</button>
         </div>
-        <div id="result"></div>
-        <div id="rewards"></div>
+        <div id="result" role="status"></div>
+        <div id="rewards" aria-live="polite"></div>
     </div>
     <script src="script.js"></script>
 </body>
