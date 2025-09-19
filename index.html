@@ -26,14 +26,36 @@
         </div>
         
         <h1>Aprende las Tablas de Multiplicar</h1>
-        <div class="character-container">
-            <img src="img/img.png" alt="Personaje educativo en un estilo amigable" id="character">
+        <div class="game-scene">
+            <div class="sea"></div>
+            <div id="islands-container"></div>
+            <div class="boat" id="boat">
+                <img src="img/img.png" alt="Capitán niño estilo Pixar" id="character">
+            </div>
+            <div class="flood" id="flood"></div>
+            <div id="danger-container" class="danger"></div>
+            <div id="rewards-container" class="rewards"></div>
         </div>
         <div class="question-container">
             <p id="question">¿Cuánto es 1 x 1?</p>
-            <input type="number" id="answer" placeholder="Tu respuesta" aria-label="Respuesta" maxlength="3">
+            <div class="calculator-display" id="calculatorDisplay" aria-label="Pantalla de calculadora">0</div>
+            <div class="calculator-buttons">
+                <button class="calc-btn" data-value="7">7</button>
+                <button class="calc-btn" data-value="8">8</button>
+                <button class="calc-btn" data-value="9">9</button>
+                <button class="calc-btn" data-value="4">4</button>
+                <button class="calc-btn" data-value="5">5</button>
+                <button class="calc-btn" data-value="6">6</button>
+                <button class="calc-btn" data-value="1">1</button>
+                <button class="calc-btn" data-value="2">2</button>
+                <button class="calc-btn" data-value="3">3</button>
+                <button class="calc-btn" data-value="0">0</button>
+                <button class="calc-btn clear" id="clearButton">C</button>
+                <button id="hintButton" class="hint-button" disabled>?</button>
+            </div>
             <button id="answerButton">Comprobar</button>
         </div>
+    <div id="timerDisplay" class="timer-display">Tiempo: 20s</div>
         <div id="result" class="result-message"></div>
         <div id="rewards" class="rewards-container"></div>
         
