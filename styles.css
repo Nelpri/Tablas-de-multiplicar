@@ -48,20 +48,22 @@ body {
 /* UI overlay centered */
 .ui-container {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 2%;
+    right: 2%;
+    left: auto;
+    transform: none;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    padding: 2rem;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
+    gap: 0.5rem;
+    align-items: stretch;
+    max-width: 280px;
+    width: 280px;
+    text-align: left;
 }
 
 .ui-container h1 {
@@ -71,22 +73,22 @@ body {
 }
 
 .question-text {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: var(--dark);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .calculator-display {
     background-color: var(--light);
     border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.8rem;
     font-weight: bold;
     width: 100%;
     max-width: 200px;
     text-align: right;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     border: 2px solid var(--primary);
 }
 
@@ -101,11 +103,11 @@ body {
 .keypad-button {
     background-color: var(--primary);
     color: white;
-    padding: 1rem;
-    font-size: 1.5rem;
-    font-weight: bold;
+    padding: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 700;
     border: none;
-    border-radius: 0.75rem;
+    border-radius: 0.6rem;
     cursor: pointer;
     transition: transform 0.2s, background-color 0.2s;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -128,6 +130,35 @@ body {
 .keypad-button[data-action="check"] {
     grid-column: span 3;
     background-color: var(--success);
+}
+
+/* Control bar (Pausar / Salir) */
+.control-bar {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.control-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    background: var(--secondary);
+    color: #fff;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.control-btn.danger {
+    background: var(--error);
+}
+
+.control-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
 }
 
 .status-message {
@@ -219,15 +250,20 @@ body {
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .ui-container {
-        padding: 1.5rem;
+        top: 1%;
+        right: 1%;
+        padding: 0.75rem;
+        width: 240px;
+        max-width: 240px;
     }
     .question-text {
-        font-size: 1.2rem;
+        font-size: 1.05rem;
     }
     .calculator-display {
-        font-size: 2rem;
+        font-size: 1.6rem;
     }
     .keypad-button {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        padding: 0.6rem;
     }
 }

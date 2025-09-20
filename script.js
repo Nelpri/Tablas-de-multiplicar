@@ -16,6 +16,8 @@ const TIME_LIMIT_SECONDS = 20;
 const DANGER_COLOR = 0xff0000;
 // const CORRECT_COLOR = 0x00ff00; // Reservado para futuros efectos
 const SCORE_CORRECT = 10;
+const SOUND_SNIP_MS = 150;
+const SOUND_RATE = 1.3;
 
 const STORAGE_KEY = 'multiplication3d_progress';
 
@@ -40,7 +42,7 @@ function initAudio(opts = {}) {
   const {
     correctPath = 'sounds/correct.mp3',
     wrongPath = 'sounds/wrong.mp3',
-    volume = 0.6
+    volume = 0.5
   } = opts;
 
   __audio_correct = new Audio(correctPath);
@@ -90,9 +92,20 @@ function safePlay(audio) {
   try {
     const p = audio.cloneNode(); // evita solapamientos al clonar
     p.volume = audio.volume;
-    p.play().catch(() => {
-      // Silencioso: algunos navegadores bloquean si no hay interacción
-    });
+    p.playbackRate = SOUND_RATE;
+
+    const playPromise = p.play();
+    // Cortar el sonido rápidamente (snippet corto)
+    setTimeout(() => {
+      try {
+        p.pause();
+        p.currentTime = 0;
+      } catch {}
+    }, SOUND_SNIP_MS);
+
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => { /* ignorar bloqueo por falta de interacción */ });
+    }
   } catch {
     // Ignorar fallos de reproducción
   }
@@ -547,6 +560,8 @@ function attachEvents() {
 
   // Pausa
   document.getElementById('resumeButton')?.addEventListener('click', hidePauseDialog);
+  document.getElementById('pauseButton')?.addEventListener('click', showPauseDialog);
+  document.getElementById('exitQuickButton')?.addEventListener('click', () => window.location.reload());
 
   // Cámara drag
   let isDragging = false;
@@ -587,7 +602,7 @@ function attachEvents() {
 // =========================
 (function start() {
   // Audio
-  initAudio({ volume: 0.6 });
+  initAudio({ volume: 0.5 });
 
   // Progreso
   loadProgress();
