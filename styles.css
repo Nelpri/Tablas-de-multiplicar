@@ -1,41 +1,21 @@
 :root {
-    /* Paleta de colores (Tonos marinos y aventura) */
-    --primary: #2a9d8f;
-    --secondary: #264653;
-    --accent: #e9c46a;
-    --light: #f1faee;
-    --dark: #1d3557;
-    --success: #2ecc71;
-    --error: #e76f51;
-    --warning: #f4a261;
-
-    --bg-start: #87CEEB;
-    --bg-end:   #A0CBEB;
+    --primary: #4361ee;
+    --secondary: #3f37c9;
+    --accent: #4cc9f0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #4caf50;
+    --error: #f44336;
+    --warning: #ff9800;
 }
-
 body {
-    font-family: 'Nunito', 'Roboto', sans-serif;
+    font-family: 'Nunito', sans-serif;
     margin: 0;
     padding: 0;
     overflow: hidden;
+    background: linear-gradient(to bottom, #87CEEB, #A0CBEB);
     color: var(--dark);
-    background: linear-gradient(to bottom, var(--bg-start), var(--bg-end));
 }
-
-/* Feedback de pistas */
-.status-message.hint {
-    color: var(--warning);
-    opacity: 1;
-    font-style: italic;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-/* 3D UI Styles (modularized) */
 #gameCanvas {
     position: absolute;
     top: 0;
@@ -44,54 +24,89 @@ body {
     height: 100%;
     display: block;
 }
-
-/* UI overlay centered */
 .ui-container {
     position: absolute;
-    top: 2%;
-    right: 2%;
-    left: auto;
-    transform: none;
+    top: 50%;
+    right: 5%;
+    transform: translateY(-50%);
     z-index: 10;
-    background: rgba(255, 255, 255, 0.92);
-    border-radius: 1rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-    padding: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-    max-width: 280px;
-    width: 280px;
-    text-align: left;
+    align-items: center;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
 }
-
-.ui-container h1 {
-    color: var(--secondary);
-    font-size: 2rem;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
     margin-bottom: 1rem;
 }
-
-.question-text {
+.header .title {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--secondary);
+    text-align: left;
+}
+.difficulty-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--dark);
+}
+.difficulty-selector select {
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--primary);
+    background-color: var(--light);
+}
+.timer-display {
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--dark);
-    margin-bottom: 0.75rem;
+    text-align: right;
+    width: 100%;
+    margin-top: 0.5rem;
 }
-
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.character-container img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    margin-bottom: 1rem;
+}
+.question-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+}
 .calculator-display {
     background-color: var(--light);
     border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 1.8rem;
+    padding: 0.5rem 1rem;
+    font-size: 2.5rem;
     font-weight: bold;
     width: 100%;
     max-width: 200px;
     text-align: right;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     border: 2px solid var(--primary);
 }
-
 .keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -99,68 +114,28 @@ body {
     width: 100%;
     max-width: 200px;
 }
-
 .keypad-button {
     background-color: var(--primary);
     color: white;
-    padding: 0.75rem;
-    font-size: 1.2rem;
-    font-weight: 700;
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
     border: none;
-    border-radius: 0.6rem;
+    border-radius: 0.75rem;
     cursor: pointer;
     transition: transform 0.2s, background-color 0.2s;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-
 .keypad-button:hover {
     background-color: var(--secondary);
     transform: translateY(-2px);
 }
-
 .keypad-button.clear {
     background-color: var(--error);
 }
-
-.keypad-button.hint {
+.keypad-button.pause {
     background-color: var(--accent);
 }
-
-.keypad-button.submit,
-.keypad-button[data-action="check"] {
-    grid-column: span 3;
-    background-color: var(--success);
-}
-
-/* Control bar (Pausar / Salir) */
-.control-bar {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: space-between;
-    margin-bottom: 0.25rem;
-}
-
-.control-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    border: none;
-    border-radius: 0.6rem;
-    cursor: pointer;
-    background: var(--secondary);
-    color: #fff;
-    transition: transform 0.2s, filter 0.2s;
-}
-
-.control-btn.danger {
-    background: var(--error);
-}
-
-.control-btn:hover {
-    filter: brightness(1.05);
-    transform: translateY(-1px);
-}
-
 .status-message {
     margin-top: 1rem;
     font-size: 1.2rem;
@@ -168,30 +143,37 @@ body {
     opacity: 0;
     transition: opacity 0.5s ease;
 }
-
 .status-message.correct {
     color: var(--success);
     opacity: 1;
 }
-
 .status-message.incorrect {
     color: var(--error);
     opacity: 1;
 }
-
-/* Timer display for accessibility feedback */
-.timer-display {
-    margin-top: 0.5rem;
-    font-weight: bold;
-    color: var(--accent);
-}
-
-.timer-display.critical {
+.shark-warning {
     color: var(--error);
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
     animation: pulse 1s infinite;
+    display: none;
 }
-
-/* Overlay dialogs */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.score-container {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 .dialog {
     position: absolute;
     top: 50%;
@@ -205,14 +187,11 @@ body {
     transition: transform 0.3s ease-out;
     max-width: 300px;
     display: none;
-    z-index: 15;
 }
-
 .dialog.active {
     display: block;
     transform: translate(-50%, -50%) scale(1);
 }
-
 .dialog-button {
     padding: 0.75rem 1.5rem;
     font-size: 1.1rem;
@@ -223,47 +202,19 @@ body {
     cursor: pointer;
     margin-top: 1rem;
 }
-
-/* Achievements container (unique id to avoid conflicts) */
-#achievementsContainer {
-    position: absolute;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255,255,255,0.9);
-    border: 2px solid var(--primary);
-    color: var(--dark);
-    border-radius: 0.75rem;
-    padding: 0.5rem 1rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 12;
-    pointer-events: none;
-    min-width: 220px;
-    text-align: center;
-    display: none; /* shown on unlocks */
-}
-
-#achievementsContainer.active {
-    display: block;
-}
-
-/* Responsive adjustments */
 @media (max-width: 600px) {
     .ui-container {
-        top: 1%;
-        right: 1%;
-        padding: 0.75rem;
-        width: 240px;
-        max-width: 240px;
+        padding: 1.5rem;
+        right: 50%;
+        transform: translate(50%, -50%);
     }
     .question-text {
-        font-size: 1.05rem;
+        font-size: 1.2rem;
     }
     .calculator-display {
-        font-size: 1.6rem;
+        font-size: 2rem;
     }
     .keypad-button {
-        font-size: 1.1rem;
-        padding: 0.6rem;
+        font-size: 1.2rem;
     }
 }
