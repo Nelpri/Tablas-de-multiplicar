@@ -1,523 +1,602 @@
+
 // script.js
-const MAX_MULTIPLICADOR = 10;
-const DELAY_NEXT_QUESTION = 1000;
-const DELAY_NEXT_TABLE = 2000;
-const QUESTIONS_PER_TABLE = 10;
+// Versión unificada sin imports: integra constants.js + audio.js + main.js en un solo archivo
 
-let questionStartTime;
-let multiplicando = 1;
-let multiplicador = 1;
-let respuestaCorrecta;
-let questionsAnsweredInTable = 0;
+// =========================
+// Configuración y constantes
+// =========================
+const ISLAND_COUNT = 10;
+const QUESTION_COUNT_PER_ISLAND = 5;
 
-// Elementos del DOM
-const questionDisplay = document.getElementById("question");
-const calculatorDisplay = document.getElementById("calculatorDisplay");
-const answerButton = document.getElementById("answerButton");
-const clearButton = document.getElementById("clearButton");
-const scoreDisplay = document.getElementById("scoreDisplay");
-const streakDisplay = document.getElementById("streakDisplay");
-const characterImg = document.getElementById("character");
-const resultDiv = document.getElementById("result");
-const rewardsDiv = document.getElementById("rewards");
-const difficultySelector = document.getElementById("difficultySelector");
-const progressBar = document.getElementById("progressFill");
-const achievementsDisplay = document.getElementById("achievementsDisplay");
-const timerDisplay = document.getElementById("timerDisplay");
-const hintButton = document.getElementById("hintButton");
-const boat = document.getElementById("boat");
-const flood = document.getElementById("flood");
+const DELAY_AFTER_CORRECT = 1500;
+const DELAY_AFTER_WRONG = 1500;
 
-// Sonidos
-const correctSound = new Audio('sounds/correct.mp3');
-const wrongSound = new Audio('sounds/wrong.mp3');
+const TIME_LIMIT_SECONDS = 20;
 
-// Configuración del juego
-const GAME_CONFIG = {
-    EASY: {
-        timeLimit: 20000,
-        pointsMultiplier: 1,
-        hints: true
-    },
-    MEDIUM: {
-        timeLimit: 10000,
-        pointsMultiplier: 2,
-        hints: false
-    },
-    HARD: {
-        timeLimit: 5000,
-        pointsMultiplier: 3,
-        hints: false
-    }
-};
+const DANGER_COLOR = 0xff0000;
+// const CORRECT_COLOR = 0x00ff00; // Reservado para futuros efectos
+const SCORE_CORRECT = 10;
 
-// Variables de juego
-let currentDifficulty = 'EASY';
-let score = 0;
-let streak = 0;
-let achievements = [];
-let tablesCompleted = [];
-let lastTable = 1;
-let timerInterval;
-let timerTimeout;
-let remainingTime;
-let hintUsed = false;
-let floodLevel = 0;
-let currentIsland = 0;
-let islands = [];
+const STORAGE_KEY = 'multiplication3d_progress';
 
-// Logros
 const ACHIEVEMENTS = [
-    { name: "¡Multiplicador Novato! 🏅", condition: "score", value: 100 },
-    { name: "¡Racha de 5! 🔥", condition: "streak", value: 5 },
-    { name: "¡Racha Incendiaria! 🌋", condition: "streak", value: 10 },
-    { name: "Tabla del 2 Completada 📚", condition: "tables", value: 2 },
-    { name: "Tabla del 5 Completada 📖", condition: "tables", value: 5 },
-    { name: "¡Maestro de 5 Tablas! 👑", condition: "totalTables", value: 5 },
-    { name: "¡Tabla del 10 Dominada! 🎯", condition: "tables", value: 10 },
-    { name: "¡Maestro de Todas las Tablas! 🏆", condition: "allTables", value: 10 },
-    { name: "¡Multiplicador Maestro! 💎", condition: "score", value: 500 },
-    { name: "¡Puntuación Épica! 🚀", condition: "score", value: 1000 },
+  { key: 'score_100', type: 'score', value: 100, label: '¡Multiplicador Novato! 🏅' },
+  { key: 'tables_5', type: 'totalTables', value: 5, label: '¡Navegante Audaz! 🏝️' },
+  { key: 'tables_10', type: 'allTables', value: 10, label: '¡Maestro de Islas! 🏆' }
 ];
 
-function generateQuestion() {
-    const config = GAME_CONFIG[currentDifficulty];
-    remainingTime = Math.floor(config.timeLimit / 1000); // in seconds
-    respuestaCorrecta = multiplicando * multiplicador;
-    questionDisplay.textContent = `¿Cuánto es ${multiplicando} x ${multiplicador}?`;
-    calculatorDisplay.textContent = '0';
-    hintUsed = false;
-    if (hintButton) {
-        hintButton.disabled = !config.hints;
-        if (config.hints) {
-            hintButton.disabled = false;
-        } else {
-            hintButton.disabled = true;
-        }
-    }
-    resultDiv.textContent = '';
-    rewardsDiv.textContent = '';
-    questionStartTime = Date.now();
-    updateTimerDisplay();
-    startTimer(config.timeLimit);
-    updateUI();
+// =========================
+// Audio: precarga y reproducción segura
+// =========================
+let __audio_correct;
+let __audio_wrong;
+let __audio_initialized = false;
+
+/**
+ * Inicializa los sonidos del juego
+ * @param {{correctPath?: string, wrongPath?: string, volume?: number}} opts
+ */
+function initAudio(opts = {}) {
+  const {
+    correctPath = 'sounds/correct.mp3',
+    wrongPath = 'sounds/wrong.mp3',
+    volume = 0.6
+  } = opts;
+
+  __audio_correct = new Audio(correctPath);
+  __audio_wrong = new Audio(wrongPath);
+
+  // Volumen inicial
+  __audio_correct.volume = volume;
+  __audio_wrong.volume = volume;
+
+  // Desbloquear audio tras la primera interacción del usuario
+  setupAudioUnlock();
+
+  __audio_initialized = true;
 }
 
-function updateTimerDisplay() {
-    if (timerDisplay) {
-        timerDisplay.textContent = `Tiempo: ${remainingTime}s`;
-        if (remainingTime <= 5) {
-            timerDisplay.classList.add('critical');
-        } else {
-            timerDisplay.classList.remove('critical');
-        }
-    }
+/**
+ * Ajusta el volumen de todos los sonidos
+ * @param {number} volume valor entre 0 y 1
+ */
+function setVolume(volume = 0.6) {
+  if (!__audio_initialized) return;
+  __audio_correct.volume = volume;
+  __audio_wrong.volume = volume;
 }
 
-function startTimer(timeLimit) {
-    // Clear any existing timers
-    clearInterval(timerInterval);
-    clearTimeout(timerTimeout);
-
-    // Update display every second
-    timerInterval = setInterval(() => {
-        remainingTime--;
-        updateTimerDisplay();
-        if (remainingTime <= 0) {
-            clearInterval(timerInterval);
-        }
-    }, 1000);
-
-    // Timeout for time up
-    timerTimeout = setTimeout(timeUp, timeLimit);
+/**
+ * Reproduce el sonido de acierto
+ */
+function playCorrect() {
+  if (!__audio_initialized) return;
+  safePlay(__audio_correct);
 }
 
-function timeUp() {
-    clearInterval(timerInterval);
-    clearTimeout(timerTimeout);
-    wrongSound.play();
-    streak = 0;
-    resultDiv.textContent = '¡Se acabó el tiempo! La respuesta era ' + respuestaCorrecta + '.';
-    resultDiv.className = 'result-message wrong';
-    characterImg.classList.add('wrong');
-    
-    // Increase flood on time up
-    floodLevel = Math.min(50, floodLevel + 30);
-    // Activar peligro visual
-    activateDanger();
-    
-    // Reinicia la tabla actual
-    multiplicador = 1;
-    questionsAnsweredInTable = 0;
-    
-    setTimeout(() => {
-        resultDiv.className = 'result-message';
-        characterImg.classList.remove('correct', 'wrong');
-        nextQuestion();
-    }, DELAY_NEXT_QUESTION);
-    
-    updateUI();
-    saveProgress();
+/**
+ * Reproduce el sonido de error
+ */
+function playWrong() {
+  if (!__audio_initialized) return;
+  safePlay(__audio_wrong);
 }
 
-function checkAnswer() {
-    // Clear timers first
-    clearInterval(timerInterval);
-    clearTimeout(timerTimeout);
-    
-    const userAnswer = parseInt(calculatorDisplay.textContent);
-    const timeTaken = Date.now() - questionStartTime;
-    const config = GAME_CONFIG[currentDifficulty];
-    
-    if (timeTaken >= config.timeLimit) {
-        timeUp();
-        return;
-    }
-    
-    if (userAnswer === respuestaCorrecta) {
-        correctSound.play();
-        const points = calculatePoints(timeTaken);
-        score += points;
-        streak++;
-        resultDiv.textContent = `¡Correcto! +${points} puntos`;
-        resultDiv.className = 'result-message correct';
-        characterImg.classList.add('correct');
-        
-        // Decrease flood on correct answer
-        if (floodLevel > 0) {
-            floodLevel = Math.max(0, floodLevel - 10);
-        }
-        
-        // Recompensa visual por acierto
-        if (streak > 0) {
-            addReward('mini');
-            correctSound.play();
-        }
-        
-        checkAchievements();
-        
-        questionsAnsweredInTable++;
-        
-        if (questionsAnsweredInTable >= QUESTIONS_PER_TABLE) {
-            checkTableCompletion();
-        } else {
-            setTimeout(nextQuestion, DELAY_NEXT_QUESTION);
-        }
-
-    } else {
-        wrongSound.play();
-        streak = 0;
-        resultDiv.textContent = `Incorrecto. La respuesta era ${respuestaCorrecta}.`;
-        resultDiv.className = 'result-message wrong';
-        characterImg.classList.add('wrong');
-        
-        // Increase flood and activate danger on wrong answer
-        floodLevel = Math.min(50, floodLevel + 20);
-        activateDanger();
-        
-        // Reinicia la tabla actual para que el usuario la domine
-        multiplicador = 1;
-        questionsAnsweredInTable = 0;
-        setTimeout(nextQuestion, DELAY_NEXT_QUESTION);
-    }
-
-    setTimeout(() => {
-        resultDiv.className = 'result-message';
-        characterImg.classList.remove('correct', 'wrong');
-        calculatorDisplay.textContent = '0';
-    }, DELAY_NEXT_QUESTION);
-    
-    updateUI();
-    saveProgress();
-}
-
-function nextQuestion() {
-    if (multiplicador < MAX_MULTIPLICADOR) {
-        multiplicador++;
-    } else {
-        multiplicador = 1;
-        questionsAnsweredInTable = 0;
-    }
-    
-    // Clear any remaining timers before next question
-    clearInterval(timerInterval);
-    clearTimeout(timerTimeout);
-    
-    setTimeout(generateQuestion, DELAY_NEXT_QUESTION);
-}
-
-function checkTableCompletion() {
-    if (questionsAnsweredInTable >= QUESTIONS_PER_TABLE && !tablesCompleted.includes(multiplicando)) {
-        tablesCompleted.push(multiplicando);
-        rewardsDiv.textContent = `¡Felicidades! ¡Has completado la tabla del ${multiplicando}! ¡Isla conquistada!`;
-        
-        // Marcar isla como completada
-        if (islands[currentIsland]) {
-            islands[currentIsland].classList.add('completed');
-            addReward('treasure', parseInt(islands[currentIsland].style.left));
-        }
-        
-        // Reset flood on table completion
-        floodLevel = 0;
-        
-        // Reiniciar pregunta para nueva tabla
-        multiplicador = 1;
-        questionsAnsweredInTable = 0;
-
-        // ¿Viaje completo?
-        if (tablesCompleted.length === MAX_MULTIPLICADOR) {
-            rewardsDiv.textContent += ` ¡Viaje completado! ¡Eres un/a navegante experto/a!`;
-            boat.classList.add('arrived');
-            updateBoatPosition();
-        } else {
-            // Avanzar a la siguiente isla/tabla
-            currentIsland = Math.min(tablesCompleted.length, MAX_MULTIPLICADOR - 1);
-            multiplicando = currentIsland + 1;
-            updateBoatPosition();
-        }
-    }
-    
-    setTimeout(generateQuestion, DELAY_NEXT_TABLE);
-}
-
-function initIslands() {
-    const container = document.getElementById('islands-container');
-    container.innerHTML = '';
-    islands = [];
-    
-    for (let i = 1; i <= MAX_MULTIPLICADOR; i++) {
-        const island = document.createElement('div');
-        island.className = 'island';
-        island.style.left = `${(i - 1) * 12}%`; // Espaciadas de 0% a 108%
-        island.dataset.table = i;
-
-        // Etiqueta con número de tabla
-        const label = document.createElement('span');
-        label.className = 'island-label';
-        label.textContent = i.toString();
-        island.appendChild(label);
-
-        container.appendChild(island);
-        islands.push(island);
-    }
-
-    // Marcar islas ya completadas (desde progreso guardado)
-    tablesCompleted.forEach(num => {
-        if (islands[num - 1]) islands[num - 1].classList.add('completed');
+/**
+ * Intenta reproducir un audio de forma segura
+ * @param {HTMLAudioElement} audio
+ */
+function safePlay(audio) {
+  try {
+    const p = audio.cloneNode(); // evita solapamientos al clonar
+    p.volume = audio.volume;
+    p.play().catch(() => {
+      // Silencioso: algunos navegadores bloquean si no hay interacción
     });
-
-    // Alinear isla actual a partir del progreso
-    currentIsland = Math.max(0, (multiplicando || 1) - 1);
-    
-    // Posición inicial barco
-    updateBoatPosition();
+  } catch {
+    // Ignorar fallos de reproducción
+  }
 }
 
-function activateDanger(duration = 3000) {
-    const danger = document.getElementById('danger-container');
-    danger.classList.add('active');
-    setTimeout(() => {
-        danger.classList.remove('active');
-    }, duration);
-}
-
-function addReward(type = 'mini', position = null) {
-    const rewardsContainer = document.getElementById('rewards-container');
-    const reward = document.createElement('div');
-    reward.className = 'reward-item';
-    reward.textContent = type === 'treasure' ? '🏝️💎' : '⭐';
-    if (position) {
-        reward.style.left = position + '%';
-    } else {
-        reward.style.left = '50%';
-    }
-    rewardsContainer.appendChild(reward);
-    
-    setTimeout(() => {
-        rewardsContainer.removeChild(reward);
-    }, 2000);
-}
-
-function calculatePoints(time) {
-    const config = GAME_CONFIG[currentDifficulty];
-    const basePoints = 10;
-    const timeBonus = Math.max(0, 1 - (time / config.timeLimit));
-    return Math.floor((basePoints + (basePoints * timeBonus)) * config.pointsMultiplier);
-}
-
-function updateBoatPosition() {
-    // Posición del barco cerca de la isla actual
-    const targetPos = currentIsland * 12; // Alineado con islas
-    const progressInIsland = (questionsAnsweredInTable / QUESTIONS_PER_TABLE) * 5; // Avance sutil dentro de isla
-    const translateX = (targetPos + progressInIsland - 5).toString() + '%'; // Offset para centrar en isla
-
-    // Usar variable CSS para no interferir con la animación de balanceo
-    boat.style.setProperty('--transX', translateX);
-
-    // Si completado todo, celebración
-    if (tablesCompleted.length >= MAX_MULTIPLICADOR) {
-        boat.classList.add('arrived');
-        // No sobreescribir transform para mantener el balanceo
-    }
-}
-
-function updateFlood() {
-    flood.style.height = floodLevel + '%';
-    if (floodLevel > 0) {
-        flood.classList.add('rising');
-    } else {
-        flood.classList.remove('rising');
-    }
-    
-    // If floodLevel >=50, maybe add sinking animation or reset
-    if (floodLevel >= 50) {
-        boat.classList.add('sinking');
-    } else {
-        boat.classList.remove('sinking');
-    }
-}
-
-function updateUI() {
-    scoreDisplay.textContent = score;
-    streakDisplay.textContent = streak;
-    
-    // Actualizar barra de progreso
-    const progress = (questionsAnsweredInTable / QUESTIONS_PER_TABLE) * 100;
-    progressBar.style.width = `${progress}%`;
-    
-    updateBoatPosition();
-    updateFlood();
-    
-    // Actualizar logros
-    displayAchievements();
-}
-
-function checkAchievements() {
-    ACHIEVEMENTS.forEach(achievement => {
-        if (!achievements.includes(achievement.name)) {
-            let unlocked = false;
-            switch (achievement.condition) {
-                case "score":
-                    if (score >= achievement.value) unlocked = true;
-                    break;
-                case "streak":
-                    if (streak >= achievement.value) unlocked = true;
-                    break;
-                case "tables":
-                    if (tablesCompleted.includes(achievement.value)) unlocked = true;
-                    break;
-            }
-
-            if (unlocked) {
-                achievements.push(achievement.name);
-                showAchievementNotification(achievement.name);
-            }
-        }
+/**
+ * Desbloquea el audio tras la primera interacción del usuario
+ */
+function setupAudioUnlock() {
+  const unlock = () => {
+    // Intento de play/pause para establecer el estado de "permitido"
+    [__audio_correct, __audio_wrong].forEach(a => {
+      try {
+        a.play().then(() => {
+          a.pause();
+          a.currentTime = 0;
+        }).catch(() => { /* ignorar */ });
+      } catch { /* ignorar */ }
     });
+    document.removeEventListener('pointerdown', unlock);
+    document.removeEventListener('keydown', unlock);
+  };
+  document.addEventListener('pointerdown', unlock, { once: true });
+  document.addEventListener('keydown', unlock, { once: true });
 }
 
-function showAchievementNotification(name) {
-    const notification = document.createElement('div');
-    notification.textContent = `🏆 ¡Logro desbloqueado: ${name}!`;
-    rewardsDiv.appendChild(notification);
-    setTimeout(() => {
-        rewardsDiv.removeChild(notification);
-    }, 3000);
+// =========================
+// Estado del juego y DOM
+// =========================
+let scene, camera, renderer;
+let boat, danger;
+const islands = [];
+
+let currentTable = 1; // 1..ISLAND_COUNT
+let questionsAnswered = 0;
+let score = 0;
+let currentAnswer = '';
+let correctAnswer = 0;
+let isPaused = false;
+
+// Progreso/Logros
+let tablesCompleted = new Set();        // set de índices 1..ISLAND_COUNT
+let unlockedAchievements = new Set();   // set de keys
+
+// Temporizador
+let timeLeft = TIME_LIMIT_SECONDS;
+let timerId = null;
+
+// DOM
+const gameCanvas = document.getElementById('gameCanvas');
+const questionDisplay = document.getElementById('questionDisplay');
+const calculatorDisplay = document.getElementById('calculatorDisplay');
+const statusMessage = document.getElementById('statusMessage');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const pauseDialog = document.getElementById('pauseDialog');
+const uiContainer = document.getElementById('gameUI');
+const timerDisplay = document.getElementById('timerDisplay');
+const achievementsContainer = document.getElementById('achievementsContainer');
+
+// =========================
+// Utilidades de UI
+// =========================
+function showStatus(text, cls) {
+  statusMessage.textContent = text;
+  statusMessage.className = `status-message ${cls || ''}`.trim();
+  statusMessage.style.opacity = 1;
 }
 
-function displayAchievements() {
-    const display = document.getElementById('achievementsDisplay');
-    display.innerHTML = '';
-    if (achievements.length > 0) {
-        achievements.forEach(ach => {
-            const p = document.createElement('p');
-            p.textContent = ach;
-            display.appendChild(p);
-        });
+function clearStatus(delay = 800) {
+  setTimeout(() => {
+    statusMessage.style.opacity = 0;
+  }, delay);
+}
+
+function updateScoreUI() {
+  scoreDisplay.textContent = String(score);
+}
+
+function updateTimerUI() {
+  if (!timerDisplay) return;
+  timerDisplay.textContent = `Tiempo: ${timeLeft}s`;
+  if (timeLeft <= 5) {
+    timerDisplay.classList.add('critical');
+  } else {
+    timerDisplay.classList.remove('critical');
+  }
+}
+
+// =========================
+// Temporizador
+// =========================
+function startTimer() {
+  stopTimer();
+  timeLeft = TIME_LIMIT_SECONDS;
+  updateTimerUI();
+  timerId = setInterval(() => {
+    if (isPaused) return;
+    timeLeft -= 1;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      updateTimerUI();
+      stopTimer();
+      onTimeUp();
     } else {
-        display.innerHTML += '<p>Ninguno aún.</p>';
+      updateTimerUI();
     }
+  }, 1000);
 }
 
-// Agregar event listener para el selector de dificultad
-difficultySelector.addEventListener('change', function(e) {
-    currentDifficulty = e.target.value;
-    saveProgress();
-});
+function stopTimer() {
+  if (timerId) {
+    clearInterval(timerId);
+    timerId = null;
+  }
+}
 
-// Sistema de guardado
+// =========================
+/* Logros */
+// =========================
+function showAchievement(label) {
+  if (!achievementsContainer) return;
+  achievementsContainer.textContent = `🏆 ${label}`;
+  achievementsContainer.classList.add('active');
+  setTimeout(() => achievementsContainer.classList.remove('active'), 3000);
+}
+
+function unlockAchievementByKey(key) {
+  if (unlockedAchievements.has(key)) return;
+  const item = ACHIEVEMENTS.find(a => a.key === key);
+  if (!item) return;
+  unlockedAchievements.add(key);
+  showAchievement(item.label);
+  saveProgress();
+}
+
+function evaluateAchievements() {
+  // score
+  const score100 = ACHIEVEMENTS.find(a => a.type === 'score' && a.value === 100);
+  if (score100 && score >= score100.value) {
+    unlockAchievementByKey(score100.key);
+  }
+  // totalTables (p.ej. 5)
+  const totalTables = ACHIEVEMENTS.find(a => a.type === 'totalTables');
+  if (totalTables && tablesCompleted.size >= totalTables.value) {
+    unlockAchievementByKey(totalTables.key);
+  }
+  // allTables (p.ej. 10)
+  const allTables = ACHIEVEMENTS.find(a => a.type === 'allTables');
+  if (allTables && tablesCompleted.size >= allTables.value) {
+    unlockAchievementByKey(allTables.key);
+  }
+}
+
+// =========================
+/* Persistencia */
+// =========================
 function saveProgress() {
-    const progress = {
-        score,
-        streak,
-        achievements,
-        difficulty: currentDifficulty,
-        tablesCompleted,
-        lastTable: multiplicando,
-        currentIsland,
-        floodLevel
-    };
-    localStorage.setItem('multiplicationProgress', JSON.stringify(progress));
+  const data = {
+    score,
+    currentTable,
+    questionsAnswered,
+    tablesCompleted: Array.from(tablesCompleted),
+    achievements: Array.from(unlockedAchievements)
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // almacenamiento no disponible
+  }
 }
 
 function loadProgress() {
-    const saved = localStorage.getItem('multiplicationProgress');
-    if (saved) {
-        const progress = JSON.parse(saved);
-        score = progress.score || 0;
-        streak = progress.streak || 0;
-        achievements = progress.achievements || [];
-        tablesCompleted = progress.tablesCompleted || [];
-        multiplicando = progress.lastTable || 1;
-        currentDifficulty = progress.difficulty || 'EASY';
-        floodLevel = progress.floodLevel || 0;
-        currentIsland = (typeof progress.currentIsland === 'number')
-            ? progress.currentIsland
-            : Math.max(0, (multiplicando || 1) - 1);
-        difficultySelector.value = currentDifficulty;
-        updateUI();
-    }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    score = data.score ?? 0;
+    currentTable = data.currentTable ?? 1;
+    questionsAnswered = data.questionsAnswered ?? 0;
+    (data.tablesCompleted ?? []).forEach(n => tablesCompleted.add(n));
+    (data.achievements ?? []).forEach(k => unlockedAchievements.add(k));
+  } catch {
+    // ignorar errores de parseo
+  }
 }
 
-// Inicializar el juego
-document.addEventListener('DOMContentLoaded', function() {
-    loadProgress();
-    initIslands(); // Inicializar islas
-    // Ensure timerDisplay exists, but we'll add it to HTML next
+// =========================
+/* Escena 3D (Three.js) */
+// =========================
+function initThreeJs() {
+  // THREE proviene del script CDN en index.html
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87CEEB);
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 10, 15);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Luz
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(5, 10, 7.5);
+  scene.add(directionalLight);
+
+  // Mar
+  const seaGeometry = new THREE.PlaneGeometry(500, 500);
+  const seaMaterial = new THREE.MeshPhongMaterial({ color: 0x4cc9f0, shininess: 50, flatShading: true });
+  const sea = new THREE.Mesh(seaGeometry, seaMaterial);
+  sea.rotation.x = -Math.PI / 2;
+  sea.position.y = -5;
+  scene.add(sea);
+
+  // Islas (círculo)
+  const islandGeometry = new THREE.CylinderGeometry(5, 5, 2, 32);
+  const islandMaterial = new THREE.MeshPhongMaterial({ color: 0x964B00 });
+  for (let i = 0; i < ISLAND_COUNT; i++) {
+    const island = new THREE.Mesh(islandGeometry, islandMaterial);
+    const angle = (i / ISLAND_COUNT) * Math.PI * 2;
+    island.position.x = Math.cos(angle) * 30;
+    island.position.z = Math.sin(angle) * 30;
+    island.userData = { table: i + 1, index: i };
+    islands.push(island);
+    scene.add(island);
+  }
+
+  // Barco
+  const boatGeometry = new THREE.BoxGeometry(1.5, 0.5, 3);
+  const boatMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+  boat = new THREE.Mesh(boatGeometry, boatMaterial);
+  scene.add(boat);
+
+  // Peligro
+  const dangerGeometry = new THREE.DodecahedronGeometry(2, 0);
+  const dangerMaterial = new THREE.MeshBasicMaterial({ color: DANGER_COLOR });
+  danger = new THREE.Mesh(dangerGeometry, dangerMaterial);
+  danger.visible = false;
+  scene.add(danger);
+
+  // Posición inicial
+  updateBoatPosition();
+}
+
+function updateBoatPosition() {
+  const islandIndex = Math.max(0, Math.min(ISLAND_COUNT - 1, currentTable - 1));
+  const targetIsland = islands[islandIndex];
+  boat.position.x = targetIsland.position.x;
+  boat.position.z = targetIsland.position.z;
+  boat.position.y = targetIsland.position.y + 2;
+
+  camera.position.x = boat.position.x;
+  camera.position.z = boat.position.z + 15;
+  camera.lookAt(boat.position);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (danger.visible) {
+    danger.rotation.x += 0.01;
+    danger.rotation.y += 0.01;
+  }
+
+  const idx = currentTable - 1;
+  if (islands[idx] && danger.visible) {
+    danger.position.x = islands[idx].position.x;
+    danger.position.z = islands[idx].position.z;
+    danger.position.y = islands[idx].position.y + 4;
+  }
+
+  renderer.render(scene, camera);
+}
+
+// =========================
+/* Preguntas y Pistas */
+// =========================
+function generateQuestion() {
+  const multiplicando = currentTable;
+  const multiplicador = Math.floor(Math.random() * 10) + 1;
+  correctAnswer = multiplicando * multiplicador;
+  currentAnswer = '';
+  calculatorDisplay.textContent = '0';
+  questionDisplay.textContent = `¿Cuánto es ${multiplicando} x ${multiplicador}?`;
+  statusMessage.style.opacity = 0;
+
+  // Mostrar peligro
+  danger.visible = true;
+
+  // Iniciar temporizador
+  startTimer();
+
+  // Guardar los operandos para pista
+  questionDisplay.dataset.multiplicando = String(multiplicando);
+  questionDisplay.dataset.multiplicador = String(multiplicador);
+}
+
+function getHintText(multiplicando, multiplicador) {
+  // Pista no reveladora: suma repetida
+  const veces = multiplicador;
+  const sumando = multiplicando;
+  const preview = Array(Math.min(veces, 5)).fill(sumando).join(' + ');
+  const extra = veces > 5 ? ` + ... (${veces} veces)` : '';
+  return `Pista: ${sumando} sumado ${veces} veces (ej: ${preview}${extra})`;
+}
+
+function onTimeUp() {
+  showStatus(`¡Se acabó el tiempo!`, 'incorrect');
+  playWrong();
+  // No avanzar de isla; solo nueva pregunta en la misma
+  setTimeout(() => {
     generateQuestion();
-    updateBoatPosition(); // Initial position
-    updateFlood(); // Initial flood
+  }, DELAY_AFTER_WRONG);
+}
 
-    // Calculator event listeners
-    const calcButtons = document.querySelectorAll('.calc-btn');
-    calcButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const value = this.dataset.value;
-            let currentValue = calculatorDisplay.textContent;
-            if (currentValue === '0' || currentValue === '') {
-                calculatorDisplay.textContent = value;
-            } else {
-                calculatorDisplay.textContent = currentValue + value;
-            }
-        });
-    });
+// =========================
+/* Respuesta */
+// =========================
+function checkAnswer() {
+  if (isPaused) return;
 
-    clearButton.addEventListener('click', function() {
-        calculatorDisplay.textContent = '0';
-    });
+  const userAnswer = parseInt(currentAnswer || '0', 10);
+  if (userAnswer === correctAnswer) {
+    score += SCORE_CORRECT;
+    updateScoreUI();
+    showStatus('¡Correcto!', 'correct');
+    playCorrect();
 
-    // Hint button functionality
-    if (hintButton) {
-        hintButton.addEventListener('click', function() {
-            if (!hintUsed) {
-                const hintText = `Pista: ${multiplicando} x ${multiplicador} = ${respuestaCorrecta}`;
-                resultDiv.textContent = hintText;
-                resultDiv.className = 'result-message hint';
-                hintUsed = true;
-                this.disabled = true;
-            }
-        });
+    danger.visible = false;
+    stopTimer();
+
+    questionsAnswered++;
+    evaluateAchievements();
+
+    if (questionsAnswered >= QUESTION_COUNT_PER_ISLAND) {
+      // Isla completada
+      tablesCompleted.add(currentTable);
+      questionsAnswered = 0;
+      currentTable++;
+
+      if (currentTable > ISLAND_COUNT) {
+        // Viaje completo
+        evaluateAchievements(); // vuelve a evaluar (allTables)
+        showGameEndDialog();
+        saveProgress();
+        return;
+      } else {
+        updateBoatPosition();
+      }
     }
 
-    answerButton.addEventListener('click', checkAnswer);
-});
+    saveProgress();
+
+    setTimeout(() => {
+      generateQuestion();
+    }, DELAY_AFTER_CORRECT);
+  } else {
+    showStatus('¡Incorrecto! Inténtalo de nuevo.', 'incorrect');
+    playWrong();
+    currentAnswer = '';
+    calculatorDisplay.textContent = '0';
+    clearStatus(DELAY_AFTER_WRONG);
+  }
+}
+
+// =========================
+/* Diálogos */
+// =========================
+function showPauseDialog() {
+  isPaused = true;
+  pauseDialog.classList.add('active');
+  uiContainer.style.display = 'none';
+}
+
+function hidePauseDialog() {
+  isPaused = false;
+  pauseDialog.classList.remove('active');
+  uiContainer.style.display = 'flex';
+}
+
+function showGameEndDialog() {
+  const finalScore = score;
+  const finalDialog = document.createElement('div');
+  finalDialog.className = 'dialog active';
+  finalDialog.innerHTML = `
+      <h2>¡Aventura Terminada!</h2>
+      <p>Has completado las tablas de multiplicar.</p>
+      <p>Puntuación Final: ${finalScore}</p>
+      <button class="dialog-button" onclick="window.location.reload();">Jugar de Nuevo</button>
+  `;
+  document.body.appendChild(finalDialog);
+  uiContainer.style.display = 'none';
+}
+
+// =========================
+/* Eventos UI */
+// =========================
+function attachEvents() {
+  // Teclado
+  document.addEventListener('keydown', (event) => {
+    if (isPaused) {
+      if (event.key === 'Escape' || event.key === 'Enter') hidePauseDialog();
+      return;
+    }
+    if (event.key >= '0' && event.key <= '9') {
+      currentAnswer += event.key;
+      calculatorDisplay.textContent = calculatorDisplay.textContent === '0'
+        ? event.key
+        : (calculatorDisplay.textContent + event.key);
+    } else if (event.key === 'Enter') {
+      checkAnswer();
+    } else if (event.key === 'Backspace') {
+      currentAnswer = currentAnswer.slice(0, -1);
+      calculatorDisplay.textContent = currentAnswer === '' ? '0' : currentAnswer;
+    } else if (event.key === 'Escape') {
+      showPauseDialog();
+    } else if (event.key === 'h' || event.key === 'H') {
+      // pista con tecla H
+      const m = parseInt(questionDisplay.dataset.multiplicando, 10);
+      const n = parseInt(questionDisplay.dataset.multiplicador, 10);
+      showStatus(getHintText(m, n), 'hint');
+    }
+  });
+
+  // Botones de keypad
+  document.querySelectorAll('.keypad-button').forEach(button => {
+    button.addEventListener('click', () => {
+      if (isPaused) return;
+
+      const value = button.dataset.value;
+      const action = button.dataset.action;
+
+      if (action === 'clear') {
+        currentAnswer = '';
+        calculatorDisplay.textContent = '0';
+      } else if (action === 'check') {
+        checkAnswer();
+      } else if (action === 'hint') {
+        const m = parseInt(questionDisplay.dataset.multiplicando, 10);
+        const n = parseInt(questionDisplay.dataset.multiplicador, 10);
+        showStatus(getHintText(m, n), 'hint');
+      } else if (typeof value !== 'undefined') {
+        currentAnswer += value;
+        calculatorDisplay.textContent = calculatorDisplay.textContent === '0'
+          ? value
+          : (calculatorDisplay.textContent + value);
+      }
+    });
+  });
+
+  // Pausa
+  document.getElementById('resumeButton')?.addEventListener('click', hidePauseDialog);
+
+  // Cámara drag
+  let isDragging = false;
+  let previousMousePosition = { x: 0, y: 0 };
+
+  gameCanvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    previousMousePosition.x = e.clientX;
+    previousMousePosition.y = e.clientY;
+  });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging || isPaused) return;
+
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+
+    camera.position.x -= deltaX * 0.05;
+    camera.position.y += deltaY * 0.05;
+    camera.lookAt(boat.position.x, boat.position.y - 2, boat.position.z);
+
+    previousMousePosition.x = e.clientX;
+    previousMousePosition.y = e.clientY;
+  });
+
+  // Resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// =========================
+/* Bootstrap */
+// =========================
+(function start() {
+  // Audio
+  initAudio({ volume: 0.6 });
+
+  // Progreso
+  loadProgress();
+  updateScoreUI();
+
+  // Escena
+  initThreeJs();
+  attachEvents();
+  animate();
+  updateBoatPosition();
+  generateQuestion();
+})();

@@ -3,70 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Tablas de Multiplicar</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Aventura de Multiplicación 3D</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <div class="background-image"></div>
-    <div class="game-container">
-        <div class="score-container">
-            Puntuación: <span id="scoreDisplay">0</span>
-            <div class="streak-counter">Racha: <span id="streakDisplay">0</span>🔥</div>
-        </div>
-        
-        <select class="difficulty-selector" id="difficultySelector" title="Selecciona la dificultad">
-            <option value="EASY">Fácil</option>
-            <option value="MEDIUM">Medio</option>
-            <option value="HARD">Difícil</option>
-        </select>
+    <canvas id="gameCanvas"></canvas>
 
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+    <div class="ui-container" id="gameUI">
+        <h1>¡Navega a la Isla de Multiplicación!</h1>
+        <p class="question-text" id="questionDisplay">¡Preparando el viaje!</p>
+        <div class="calculator-display" id="calculatorDisplay">0</div>
+        <div class="keypad" role="group" aria-label="Teclado numérico">
+            <button class="keypad-button" data-value="7" aria-label="Siete">7</button>
+            <button class="keypad-button" data-value="8" aria-label="Ocho">8</button>
+            <button class="keypad-button" data-value="9" aria-label="Nueve">9</button>
+            <button class="keypad-button" data-value="4" aria-label="Cuatro">4</button>
+            <button class="keypad-button" data-value="5" aria-label="Cinco">5</button>
+            <button class="keypad-button" data-value="6" aria-label="Seis">6</button>
+            <button class="keypad-button" data-value="1" aria-label="Uno">1</button>
+            <button class="keypad-button" data-value="2" aria-label="Dos">2</button>
+            <button class="keypad-button" data-value="3" aria-label="Tres">3</button>
+            <button class="keypad-button" data-value="0" aria-label="Cero">0</button>
+            <button class="keypad-button clear" data-action="clear" aria-label="Borrar">C</button>
+            <button class="keypad-button hint" data-action="hint" aria-label="Mostrar pista">?</button>
+            <button class="keypad-button" data-action="check" aria-label="Comprobar respuesta">✓</button>
         </div>
-        
-        <h1>Aprende las Tablas de Multiplicar</h1>
-        <div class="game-scene">
-            <div class="sea"></div>
-            <div id="islands-container"></div>
-            <div class="boat" id="boat">
-                <img src="img/img.png" alt="Capitán niño estilo Pixar" id="character">
-            </div>
-            <div class="flood" id="flood"></div>
-            <div id="danger-container" class="danger"></div>
-            <div id="rewards-container" class="rewards"></div>
-        </div>
-        <div class="question-container">
-            <p id="question">¿Cuánto es 1 x 1?</p>
-            <div class="calculator-display" id="calculatorDisplay" aria-label="Pantalla de calculadora">0</div>
-            <div class="calculator-buttons">
-                <button class="calc-btn" data-value="7">7</button>
-                <button class="calc-btn" data-value="8">8</button>
-                <button class="calc-btn" data-value="9">9</button>
-                <button class="calc-btn" data-value="4">4</button>
-                <button class="calc-btn" data-value="5">5</button>
-                <button class="calc-btn" data-value="6">6</button>
-                <button class="calc-btn" data-value="1">1</button>
-                <button class="calc-btn" data-value="2">2</button>
-                <button class="calc-btn" data-value="3">3</button>
-                <button class="calc-btn" data-value="0">0</button>
-                <button class="calc-btn clear" id="clearButton">C</button>
-                <button id="hintButton" class="hint-button" disabled>?</button>
-            </div>
-            <button id="answerButton">Comprobar</button>
-        </div>
-    <div id="timerDisplay" class="timer-display">Tiempo: 20s</div>
-        <div id="result" class="result-message"></div>
-        <div id="rewards" class="rewards-container"></div>
-        
-        <div class="achievements-container">
-            <h2>Logros</h2>
-            <div id="achievementsDisplay" class="achievements-list">
-                <p>Ninguno aún.</p>
-            </div>
-        </div>
+        <p class="timer-display" id="timerDisplay" role="status" aria-live="polite">Tiempo: 20s</p>
+        <p class="status-message" id="statusMessage" role="status" aria-live="polite"></p>
     </div>
-    
+
+    <div class="score-container">
+        Puntuación: <span id="scoreDisplay">0</span>
+    </div>
+
+    <div id="pauseDialog" class="dialog">
+        <h2>Juego Pausado</h2>
+        <button id="resumeButton" class="dialog-button">Continuar</button>
+        <button id="exitButton" class="dialog-button" onclick="window.location.reload();">Salir</button>
+    </div>
+    <div id="achievementsContainer" aria-live="polite" role="status"></div>
+
     <script src="script.js"></script>
 </body>
 </html>

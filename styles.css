@@ -1,251 +1,32 @@
-/* styles.css */
 :root {
-    --primary: #4361ee;
-    --secondary: #3f37c9;
-    --accent: #4cc9f0;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #4caf50;
-    --error: #f44336;
-    --warning: #ff9800;
+    /* Paleta de colores (Tonos marinos y aventura) */
+    --primary: #2a9d8f;
+    --secondary: #264653;
+    --accent: #e9c46a;
+    --light: #f1faee;
+    --dark: #1d3557;
+    --success: #2ecc71;
+    --error: #e76f51;
+    --warning: #f4a261;
+
+    --bg-start: #87CEEB;
+    --bg-end:   #A0CBEB;
 }
 
 body {
     font-family: 'Nunito', 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
     overflow: hidden;
     color: var(--dark);
+    background: linear-gradient(to bottom, var(--bg-start), var(--bg-end));
 }
 
-.background-image {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('img/background.png');
-    background-size: cover;
-    background-position: center;
-    filter: blur(5px) brightness(0.7);
-    z-index: -1;
-    transform: scale(1.1);
-}
-
-.game-container {
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 2rem;
-    border-radius: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    max-width: 500px;
-    width: 90%;
-    position: relative;
-    z-index: 1;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-}
-
-.score-container {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 0.5rem 1rem;
-    border-radius: 1rem;
-    font-weight: bold;
-    font-size: 1.1rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.streak-counter {
-    color: var(--primary);
-    font-size: 1.2rem;
-    margin-top: 1rem;
-}
-
-.difficulty-selector {
-    margin-bottom: 1rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: 2px solid var(--primary);
-    background-color: var(--light);
-    font-family: inherit;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.difficulty-selector:hover {
-    background-color: var(--primary);
-    color: var(--light);
-}
-
-.progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    overflow: hidden;
-    margin-bottom: 2rem;
-}
-
-.progress-fill {
-    height: 100%;
-    width: 0%;
-    background-color: var(--accent);
-    transition: width 0.5s ease-in-out;
-}
-
-h1 {
-    color: var(--secondary);
-    font-size: 2.5rem;
-    margin-top: 0;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-}
-
-.character-container {
-    margin-bottom: 1rem;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#character {
-    width: 150px;
-    height: 150px;
-    object-fit: contain;
-    animation: bounce 2s ease-in-out infinite;
-}
-
-.question-container {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-#question {
-    margin: 0;
-    font-weight: bold;
-    color: var(--dark);
-}
-
-#answer {
-    padding: 0.75rem;
-    font-size: 1.5rem;
-    text-align: center;
-    width: 100px;
-    border-radius: 0.5rem;
-    border: 2px solid #ccc;
-    margin-right: 0.5rem;
-    transition: border-color 0.3s ease;
-}
-
-#answer:focus {
-    outline: none;
-    border-color: var(--primary);
-}
-
-#answerButton {
-    padding: 0.75rem 1.5rem;
-    font-size: 1.5rem;
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-#answerButton:hover {
-    background-color: var(--secondary);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-.result-message {
-    font-size: 1.5rem;
-    font-weight: bold;
-    height: 30px;
-    margin-bottom: 1rem;
-}
-
-.correct {
-    color: var(--success);
-    animation: pop 0.5s ease-out;
-}
-
-.wrong {
-    color: var(--error);
-    animation: shake 0.5s ease-out;
-}
-
-.rewards-container {
-    margin-top: 1rem;
-    font-size: 1.2rem;
-    font-weight: bold;
+/* Feedback de pistas */
+.status-message.hint {
     color: var(--warning);
-    height: 25px;
-}
-
-.achievements-container {
-    margin-top: 2rem;
-    text-align: left;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 1rem;
-    border-radius: 1rem;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.achievements-container h2 {
-    margin-top: 0;
-    color: var(--primary);
-}
-
-.achievements-list p {
-    margin: 0.5rem 0;
+    opacity: 1;
     font-style: italic;
-    color: var(--dark);
-}
-
-/* Animaciones */
-@keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
-}
-
-@keyframes pop {
-    0% { transform: scale3d(1, 1, 1); }
-    20% { transform: scale3d(1.2, 1.2, 1.2); }
-    40% { transform: scale3d(0.9, 0.9, 0.9); }
-    60% { transform: scale3d(1.1, 1.1, 1.1); }
-    80% { transform: scale3d(0.95, 0.95, 0.95); }
-    100% { transform: scale3d(1, 1, 1); }
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-.timer-display {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--warning);
-    margin-bottom: 1rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-}
-
-.timer-display.critical {
-    color: var(--error);
-    animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
@@ -253,447 +34,200 @@ h1 {
     50% { opacity: 0.5; }
     100% { opacity: 1; }
 }
-.hint-button {
-    padding: 0.75rem;
-    font-size: 1.5rem;
-    background-color: var(--warning);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-left: 0.5rem;
-    width: 50px;
-    height: 50px;
-}
 
-.hint-button:hover:not(:disabled) {
-    background-color: #e68900;
-    transform: scale(1.1);
-}
-
-.hint-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.result-message.hint {
-    color: var(--warning);
-    font-style: italic;
-}
-/* Responsive Design */
-@media (max-width: 480px) {
-    .game-container {
-        padding: 1rem;
-        margin: 1rem;
-        width: 95%;
-        border-radius: 1rem;
-    }
-    
-    h1 {
-        font-size: 2rem;
-    }
-    
-    .question-container {
-        font-size: 1.5rem;
-    }
-    
-    #answer {
-        width: 80px;
-        font-size: 1.25rem;
-    }
-    
-    #answerButton, .hint-button {
-        font-size: 1.25rem;
-        padding: 0.5rem 1rem;
-    }
-    
-    .character-container {
-        height: 120px;
-    }
-    
-    #character {
-        width: 120px;
-        height: 120px;
-    }
-    
-    .score-container {
-        font-size: 1rem;
-        padding: 0.25rem 0.5rem;
-        position: static;
-        margin-bottom: 1rem;
-    }
-    
-    .streak-counter {
-        font-size: 1rem;
-        margin-top: 0.5rem;
-    }
-    
-    .difficulty-selector {
-        font-size: 0.9rem;
-        padding: 0.4rem;
-    }
-    
-    .achievements-container {
-        padding: 0.5rem;
-    }
-}
-
-/* Enhanced Animations */
-.game-container {
-    animation: fadeIn 0.8s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.progress-fill {
-    animation: fillProgress 0.5s ease-out;
-}
-
-@keyframes fillProgress {
-    from {
-        width: 0%;
-    }
-}
-
-#answerButton:active, .hint-button:active {
-    transform: scale(0.95);
-}
-
-.achievements-list p {
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-/* Game Scene Styles */
-.game-scene {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    margin: 1rem 0;
-    border-radius: 1rem;
-    overflow: hidden;
-    background: linear-gradient(to bottom, skyblue 0%, lightblue 100%);
-}
-
-#islands-container {
+/* 3D UI Styles (modularized) */
+#gameCanvas {
     position: absolute;
-    top: 10%;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    display: block;
 }
 
-.island {
+/* UI overlay centered */
+.ui-container {
     position: absolute;
-    width: 100px;
-    height: 100px;
-    background-color: #8b4513;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transition: all 0.5s ease;
-    opacity: 0.8;
-}
-
-/* Etiqueta numérica de cada isla (tabla) */
-.island-label {
-    position: absolute;
-    top: -20px;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.85);
-    color: var(--dark);
-    font-weight: 800;
-    padding: 2px 6px;
-    border: 2px solid var(--primary);
-    border-radius: 999px;
-    font-size: 0.8rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    pointer-events: none;
-}
-
-.island.completed {
-    background-color: #ffd700;
-    animation: treasure-glow 1s ease-in-out infinite alternate;
-}
-
-.island::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: #90ee90;
-    border-radius: 50%;
-    z-index: 2;
-}
-
-#danger-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 3;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none; /* No bloquear interacción del juego */
-}
-
-.danger.active {
-    opacity: 1;
-    animation: storm 2s ease-in-out infinite;
-}
-
-.danger::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 2px,
-        rgba(128, 128, 128, 0.3) 2px,
-        rgba(128, 128, 128, 0.3) 4px
-    );
-    animation: rain 1s linear infinite;
-}
-
-#rewards-container {
-    position: absolute;
-    bottom: 60%;
-    left: 0;
-    width: 100%;
-    z-index: 2;
-    pointer-events: none;
-}
-
-.reward-item {
-    position: absolute;
-    font-size: 2rem;
-    animation: reward-float 1s ease-out;
-}
-
-@keyframes treasure-glow {
-    from { box-shadow: 0 0 5px #ffd700; }
-    to { box-shadow: 0 0 20px #ffd700, 0 0 30px #ff0000; }
-}
-
-@keyframes storm {
-    0%, 100% { transform: translateX(0) skew(0deg); }
-    50% { transform: translateX(10px) skew(5deg); }
-}
-
-@keyframes rain {
-    from { transform: translateY(0); }
-    to { transform: translateY(100px); }
-}
-
-@keyframes reward-float {
-    0% { transform: translateY(0) scale(0); opacity: 0; }
-    50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-50px) scale(1); opacity: 0; }
-}
-
-.sea {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60%;
-    background-color: #006994;
-    border-top: 2px solid #00bfff;
-    /* Simple waves */
-    background: repeating-linear-gradient(
-        90deg,
-        #006994,
-        #006994 10px,
-        #00bfff 10px,
-        #00bfff 20px
-    );
-}
-
-
-.boat {
-    position: absolute;
-    bottom: 60%;
-    left: -10%;
-    width: 120px;
-    height: 70px;
-    background-color: #8b4513;
-    border-radius: 0 0 50% 50%;
-    /* Simple boat shape */
-    z-index: 2;
-    transition: transform 2s ease-in-out;
-    animation: gentle-rock 3s ease-in-out infinite;
-    transform: translateX(var(--transX, 0)); /* JS actualiza esta variable */
-}
-
-@keyframes gentle-rock {
-    0%, 100% { transform: translateX(var(--transX, 0)) rotate(-2deg); }
-    50% { transform: translateX(var(--transX, 0)) rotate(2deg); }
-}
-
-#boat {
-    /* JS will update transform for progress */
-}
-
-#character {
-    position: absolute;
-    top: -40px;
-    left: 20%;
-    transform: translateX(0);
-    width: 60px;
-    height: 60px;
-    /* Positioned forward for steering */
-}
-
-.flood {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 0%;
-    background-color: rgba(0, 105, 148, 0.7);
-    z-index: 1;
-    transition: height 0.5s ease;
-}
-
-#flood {
-    /* JS will update height for flooding */
-}
-
-/* Boat sailing animation */
-@keyframes boat-sail {
-    from { transform: translateX(0) rotate(0deg); }
-    to { transform: translateX(100%) rotate(5deg); }
-}
-
-@keyframes sail-between-islands {
-    0% { transform: translateX(0) rotate(0deg); }
-    100% { transform: translateX(var(--target-pos)) rotate(2deg); }
-}
-
-/* Flood rise animation */
-@keyframes flood-rise {
-    from { height: 0%; }
-    to { height: 50%; }
-}
-
-/* Adjust game-container for scene */
-.game-container {
-    max-height: none; /* Allow space for scene */
-}
-
-/* Calculator Styles */
-.calculator-display {
-    padding: 0.75rem;
-    font-size: 1.5rem;
-    text-align: right;
-    width: 120px;
-    border-radius: 0.5rem;
-    border: 2px solid #ccc;
-    margin: 0 auto 0.5rem;
-    background: white;
-    height: 50px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 2rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    box-sizing: border-box;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
 }
 
-.calculator-buttons {
+.ui-container h1 {
+    color: var(--secondary);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.question-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+}
+
+.calculator-display {
+    background-color: var(--light);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 2.5rem;
+    font-weight: bold;
+    width: 100%;
+    max-width: 200px;
+    text-align: right;
+    margin-bottom: 1rem;
+    border: 2px solid var(--primary);
+}
+
+.keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.25rem;
-    margin-bottom: 1rem;
-    max-width: 180px;
-    margin: 0 auto;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 200px;
 }
 
-.calculator-buttons .calc-btn,
-.calculator-buttons .clear {
-    padding: 0.75rem;
-    font-size: 1.25rem;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-height: 50px;
-}
-
-.calculator-buttons .calc-btn {
+.keypad-button {
     background-color: var(--primary);
     color: white;
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.calculator-buttons .calc-btn:hover {
+.keypad-button:hover {
     background-color: var(--secondary);
     transform: translateY(-2px);
 }
 
-.calculator-buttons .clear {
-    background-color: var(--warning);
-    grid-column: 2;
+.keypad-button.clear {
+    background-color: var(--error);
 }
 
-.calculator-buttons .clear:hover {
-    background-color: #e68900;
+.keypad-button.hint {
+    background-color: var(--accent);
 }
 
-.calculator-buttons .hint-button {
-    grid-column: 3;
-    background-color: var(--warning);
-    width: auto;
-    height: auto;
-    padding: 0.75rem;
-    font-size: 1.25rem;
+.keypad-button.submit,
+.keypad-button[data-action="check"] {
+    grid-column: span 3;
+    background-color: var(--success);
 }
 
-.calculator-buttons .hint-button:hover:not(:disabled) {
-    background-color: #e68900;
-    transform: scale(1.05);
+.status-message {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
-/* Responsive for calculator */
-@media (max-width: 480px) {
+.status-message.correct {
+    color: var(--success);
+    opacity: 1;
+}
+
+.status-message.incorrect {
+    color: var(--error);
+    opacity: 1;
+}
+
+/* Timer display for accessibility feedback */
+.timer-display {
+    margin-top: 0.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.timer-display.critical {
+    color: var(--error);
+    animation: pulse 1s infinite;
+}
+
+/* Overlay dialogs */
+.dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+    transition: transform 0.3s ease-out;
+    max-width: 300px;
+    display: none;
+    z-index: 15;
+}
+
+.dialog.active {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.dialog-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+/* Achievements container (unique id to avoid conflicts) */
+#achievementsContainer {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.9);
+    border: 2px solid var(--primary);
+    color: var(--dark);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 12;
+    pointer-events: none;
+    min-width: 220px;
+    text-align: center;
+    display: none; /* shown on unlocks */
+}
+
+#achievementsContainer.active {
+    display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .ui-container {
+        padding: 1.5rem;
+    }
+    .question-text {
+        font-size: 1.2rem;
+    }
     .calculator-display {
-        width: 100px;
-        font-size: 1.25rem;
+        font-size: 2rem;
     }
-    
-    .calculator-buttons {
-        max-width: 150px;
-        gap: 0.2rem;
-    }
-    
-    .calculator-buttons .calc-btn,
-    .calculator-buttons .clear {
-        padding: 0.5rem;
-        font-size: 1.1rem;
-        min-height: 40px;
+    .keypad-button {
+        font-size: 1.2rem;
     }
 }
